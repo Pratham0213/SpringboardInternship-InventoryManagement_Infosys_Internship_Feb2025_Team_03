@@ -52,14 +52,6 @@ const forgotPassword = async (req, res) => {
         const resetPasswordTimeout = Date.now() + 10 * 60 * 1000; //10 minutes
 
         await User.findByIdAndUpdate({ _id: user._id }, { resetPasswordToken, resetPasswordTimeout });
-        // console.log(process.env.MY_EMAIL);
-        // console.log(process.env.MY_MAIL_PASSWORD);
-        // console.log(user);
-        // try {
-        //     await user.save();
-        // } catch (err) {
-        //     return res.status(500).json({ error: "Error saving user token" });
-        // }
 
         const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
