@@ -37,6 +37,10 @@ const userSchema = new Schema({
     },
     resetPasswordTimeout: {
         type: Date
+    },
+    admin: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

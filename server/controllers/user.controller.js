@@ -14,11 +14,13 @@ const register = async (req, res) => {
                 phoneNumber,
                 address
             });
+            console.log(fullname, email, password, phoneNumber, address);
             return res.status(201).json({ 'message': 'User created' });
         } else {
             throw new Error('Invalid Inputs');
         }
     } catch (error) {
+        console.log(error);
         return res.status(400).json({ 'message': 'Some error occured' });
 
     }
