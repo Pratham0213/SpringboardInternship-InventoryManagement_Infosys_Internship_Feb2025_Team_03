@@ -2,21 +2,19 @@ import React, { useState } from "react";
 import axios from "axios";
 import { FaEnvelope } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
 
     if (!email) {
-      setError("Email is required.");
+      toast.error("Email is required.");
       setLoading(false);
       return;
     }
@@ -27,9 +25,13 @@ const ForgotPassword = () => {
         { email }
       );
 
-      setSuccess("Reset link sent! Check your email.");
+      toast.success("Reset link sent! Check your email.");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send reset link.");
+      if (err.response?.data?.message.includes("not found")) {
+        toast.error("Email not registered in our system.");
+      } else {
+        toast.error(err.response?.data?.message || "Failed to send reset link.");
+      }
     } finally {
       setLoading(false);
     }
@@ -60,9 +62,6 @@ const ForgotPassword = () => {
           password.
         </p>
 
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
-
         <form
           className="w-full max-w-2xs text-[14px]"
           style={{ fontFamily: "'Nunito'" }}
@@ -84,10 +83,12 @@ const ForgotPassword = () => {
 
           {/* Reset Password Button */}
           <button
+            type="submit"
+            disabled={loading}
             className="w-full py-1 text-[20px] font-bold bg-custom-purple text-white rounded-full shadow-md hover:bg-custom-purple"
             style={{ fontFamily: "'Merriweather Sans'" }}
           >
-            next
+            {loading ? "Sending..." : "Next"}
           </button>
         </form>
 
@@ -126,6 +127,21 @@ const ForgotPassword = () => {
           </p>
         </div>
       </div>
+      
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        toastStyle={{ backgroundColor: "#33598B" }}
+      />
     </div>
   );
 };

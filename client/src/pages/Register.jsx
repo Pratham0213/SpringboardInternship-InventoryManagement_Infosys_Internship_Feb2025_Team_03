@@ -10,9 +10,12 @@ import {
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -21,9 +24,7 @@ const Register = () => {
     phoneNumber: "",
     address: "",
   });
-
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null); // Success message
+  
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -35,29 +36,28 @@ const Register = () => {
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
 
     if (!formData.email || !formData.password) {
-      setError("Both email and password are required.");
+      toast.error("Both email and password are required.");
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      toast.error("Password must be at least 6 characters long.");
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
+      setLoading(false);
       return;
     }
 
     if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      setError("Phone number must be exactly 10 digits.");
+      toast.error("Phone number must be exactly 10 digits.");
       setLoading(false);
       return;
     }
@@ -77,8 +77,7 @@ const Register = () => {
       );
 
       if (response.data.success) {
-        setLoading(false);
-        setSuccess("Registration successful! Redirecting to login...");
+        toast.success("Registration successful! Redirecting to login...");
         setTimeout(() => {
           navigate("/login");
         }, 1500);
@@ -88,9 +87,9 @@ const Register = () => {
         err.response?.data?.message.includes("duplicate key") ||
         err.response?.data?.message.includes("email already exists")
       ) {
-        setError("Email already registered. Please log in.");
+        toast.error("Email already registered. Please log in.");
       } else {
-        setError(err.response?.data?.message || "Registration failed.");
+        toast.error(err.response?.data?.message || "Registration failed.");
       }
     } finally {
       setLoading(false);
@@ -121,9 +120,6 @@ const Register = () => {
           Access all that StockSync has to offer with a single <br /> account.
           All fields are required.
         </p>
-        {/* Error and Success Messages */}
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-        {success && <p className="text-green-500 text-sm mb-2">{success}</p>}
 
         <form
           className="w-full max-w-2xs mt-6 text-[14px]"
@@ -179,11 +175,11 @@ const Register = () => {
             </button>
           </div>
 
-          {/* Password */}
+          {/* Confirm Password */}
           <div className="relative mb-4">
             <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
@@ -194,9 +190,9 @@ const Register = () => {
             <button
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
 
@@ -276,6 +272,21 @@ const Register = () => {
           </p>
         </div>
       </div>
+      
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        toastStyle={{ backgroundColor: "#33598B" }}
+      />
     </div>
   );
 };

@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,12 +19,10 @@ const Login = () => {
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
     setLoading(true);
 
     if (!formData.email || !formData.password) {
-      setError("Both email and password are required.");
+      toast.error("Both email and password are required.");
       setLoading(false);
       return;
     }
@@ -39,12 +37,12 @@ const Login = () => {
       );
 
       if (response.data.success) {
-        setSuccess("Login successful! Redirecting...");
+        toast.success("Login successful! Redirecting...");
         localStorage.setItem("token", response.data.token); // Store JWT token
         setTimeout(() => navigate("/dashboard"), 1500); // Redirect after 1.5 sec
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid email or password.");
+      toast.error(err.response?.data?.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
@@ -74,9 +72,6 @@ const Login = () => {
           Access all that StockSync has to offer with a single <br /> account.
           All fields are required.
         </p>
-        {/* Error and Success Messages */}
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-        {success && <p className="text-green-500 text-sm mb-2">{success}</p>}
 
         <form
           className="w-full max-w-2xs mt-6 text-[14px]"
@@ -171,6 +166,20 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };

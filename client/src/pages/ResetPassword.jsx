@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -11,45 +13,74 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null); // To show success message
+  
+  // Remove error and success state variables as we'll use toast instead
+  
+  useEffect(() => {
+    // Verify token validity on component mount
+    const verifyToken = async () => {
+      try {
+        await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/users/verify-reset-token/${token}`);
+      } catch (err) {
+        toast.error("Invalid or expired reset token. Please request a new password reset link.", {
+          position: "top-right",
+          autoClose: 5000
+        });
+        setTimeout(() => navigate("/forgot-password"), 5000);
+      }
+    };
+    
+    verifyToken();
+  }, [token, navigate]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(null);
 
     // Password validation
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.", {
+        position: "top-right",
+        autoClose: 3000
+      });
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      toast.error("Password must be at least 6 characters long.", {
+        position: "top-right",
+        autoClose: 3000
+      });
       setLoading(false);
       return;
     }
 
     try {
-      console.log("API URL:", import.meta.env.VITE_SERVER_URL);
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/users/reset-password/${token}`,
         { password }
       );
 
       if (response.data.success) {
-        setSuccess("Password reset successful! Redirecting to login...");
+        toast.success("Password reset successful! Redirecting to login...", {
+          position: "top-right",
+          autoClose: 3000
+        });
         setTimeout(() => navigate("/login"), 3000);
       }
     } catch (err) {
       if (err.response?.status === 400) {
-        setError("Invalid or expired token! Try resetting again.");
+        toast.error("Invalid or expired token! Try resetting again.", {
+          position: "top-right",
+          autoClose: 5000
+        });
       } else {
-        setError(err.response?.data?.message || "Something went wrong!");
+        toast.error(err.response?.data?.message || "Something went wrong!", {
+          position: "top-right",
+          autoClose: 5000
+        });
       }
     } finally {
       setLoading(false);
@@ -58,6 +89,9 @@ const ResetPassword = () => {
 
   return (
     <div className="flex min-h-screen">
+      {/* Toast Container */}
+      <ToastContainer />
+      
       {/* Left Section (Form) */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 py-12 bg-white">
         <h1
@@ -79,9 +113,6 @@ const ResetPassword = () => {
         >
           Set your new password.
         </p>
-
-        {error && <p className="error-message">{error}</p>}
-        {success && <p className="success-message">{success}</p>}
 
         <form
           className="w-full max-w-2xs mt-6 text-[14px]"
@@ -109,7 +140,7 @@ const ResetPassword = () => {
             </button>
           </div>
 
-          {/* Password */}
+          {/* Confirm Password */}
           <div className="relative mt-4 mb-8">
             <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
