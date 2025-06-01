@@ -31,9 +31,8 @@ const Inventory = () => {
   useEffect(() => {
     axios
       .get(
-        `${
-          import.meta.env.VITE_SERVER_URL
-        }/api/product/productPagination?page=${page}&limit=l0`,
+        `${import.meta.env.VITE_SERVER_URL
+        }/api/product/productPagination?page=${page}&limit=10`,
         { withCredentials: true }
       )
       .then(({ data }) => {
@@ -49,13 +48,21 @@ const Inventory = () => {
         setProducts([...data.products]);
         setTotalPages(data.totalPages);
       })
-      .catch(
-        ({
-          response: {
-            data: { message },
-          },
-        }) => alert(message)
-      );
+      //Pratham Local
+      .catch((error) => {
+        const message =
+          error?.response?.data?.message ||
+          error.message ||
+          "An unknown error occurred";
+        alert(message);
+      });
+    // .catch(
+    //   ({
+    //     response: {
+    //       data: { message },
+    //     },
+    //   }) => alert(message)
+    // );
   }, [page]);
   return (
     <>
@@ -127,9 +134,8 @@ const Inventory = () => {
             <tbody>
               {products.map((prod, index) => (
                 <tr
-                  className={`${
-                    index == products.length - 1 ? "" : "border-b-[1px]"
-                  } border-theme hover:scale-101 hover:bg-theme hover:text-white`}
+                  className={`${index == products.length - 1 ? "" : "border-b-[1px]"
+                    } border-theme hover:scale-101 hover:bg-theme hover:text-white`}
                   key={prod._id}
                 >
                   <td className="p-2">{prod.name}</td>
@@ -138,11 +144,10 @@ const Inventory = () => {
                   <td className="p-2">{prod.thresholdValue}</td>
                   <td className="p-2">{addTwoYears(prod.createdAt)}</td>
                   <td
-                    className={`p-2 ${
-                      checkAvailability(prod.qtyRemaining, prod.thresholdValue)
-                        ? "text-green-500"
-                        : "text-myred"
-                    }`}
+                    className={`p-2 ${checkAvailability(prod.qtyRemaining, prod.thresholdValue)
+                      ? "text-green-500"
+                      : "text-myred"
+                      }`}
                   >
                     {checkAvailability(prod.qtyRemaining, prod.thresholdValue)
                       ? "In-Stock"
